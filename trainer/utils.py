@@ -2,23 +2,6 @@ import cv2
 import os
 import uuid
 from io import BytesIO
-import subprocess
-
-def reencode_video(input_path, output_path):
-    try:
-        command = [
-            "ffmpeg", "-i", input_path,
-            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-            "-pix_fmt", "yuv420p",  # Ensures compatibility
-            "-movflags", "+faststart",  # Optimizes for streaming
-            output_path
-        ]
-        subprocess.run(command, check=True)
-        print(f"Re-encoding complete: {output_path}")
-    except Exception as e:
-        print(f"Error during FFMPEG re-encoding: {e}")
-        raise
-
 
 def process_uploaded_video(input_video_bytes, exercise_analyzer):
     """
@@ -90,62 +73,6 @@ def process_uploaded_video(input_video_bytes, exercise_analyzer):
     except Exception as e:
         print(f"Error processing video: {e}")
         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
-# def process_uploaded_video(input_video_bytes, exercise_analyzer):
-#     processed_video_bytes = BytesIO()
-#     try:
-#         input_temp_file = f"/tmp/input_video_{uuid.uuid4().hex}.mp4"
-#         output_temp_file = f"/tmp/output_video_{uuid.uuid4().hex}.mp4"
-#         reencoded_temp_file = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
-
-#         # Write input video to temp file
-#         with open(input_temp_file, "wb") as f:
-#             f.write(input_video_bytes.read())
-
-#         cap = cv2.VideoCapture(input_temp_file)
-#         if not cap.isOpened():
-#             print("Error: Unable to open input video file.")
-#             return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
-#         fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
-#         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-#         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-#         out = cv2.VideoWriter(output_temp_file, fourcc, fps, (width, height))
-#         frames_processed = 0
-
-#         while cap.isOpened():
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-#             processed_frame = exercise_analyzer.start_exercise(frame)
-#             processed_frame = cv2.resize(processed_frame, (width, height))
-#             out.write(processed_frame)
-#             frames_processed += 1
-
-#         cap.release()
-#         out.release()
-
-#         # Re-encode the processed video
-#         reencode_video(output_temp_file, reencoded_temp_file)
-
-#         # Write re-encoded video to BytesIO
-#         with open(reencoded_temp_file, "rb") as f:
-#             processed_video_bytes.write(f.read())
-
-#         # Clean up temp files
-#         os.remove(input_temp_file)
-#         os.remove(output_temp_file)
-#         os.remove(reencoded_temp_file)
-
-#         processed_video_bytes.seek(0)
-#         return {"success": True, "processed_video_bytes": processed_video_bytes, "frames_processed": frames_processed}
-#     except Exception as e:
-#         print(f"Error processing video: {e}")
-#         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
-
 
 def process_webcam_video(exercise_analyzer, display_callback, placeholder=None):
     """
