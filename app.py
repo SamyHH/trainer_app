@@ -10,7 +10,6 @@ import numpy as np
 def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
     # Convert the video frame to a NumPy array
     frame = frame.to_ndarray(format="bgr24")
-    print
 
     # Flip the frame horizontally for natural webcam behavior
     frame = cv2.flip(frame, 1)
@@ -23,17 +22,18 @@ def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
 
 class VideoProcessor(VideoTransformerBase):
     def __init__(self, exercise_id):
+        print(f"Initializing VideoProcessor with exercise_id: {exercise_id}")
         self.exercise = ExerciseAnalyzer(exercise_id=exercise_id)
 
-    def transform(self, frame):
+    def recv(self, frame):
         print("Received a frame")  # Debugging
         frame = frame.to_ndarray(format="bgr24")
         print("Frame converted to NumPy array")  # Debugging
         frame = cv2.flip(frame, 1)
         print("Frame flipped")  # Debugging
         # Bypass exercise processing temporarily
-        # processed_frame = self.exercise.start_exercise(frame)
-        processed_frame = frame  # For debugging, just pass through
+        processed_frame = self.exercise.start_exercise(frame)
+        #processed_frame = frame  # For debugging, just pass through
         return av.VideoFrame.from_ndarray(processed_frame, format="bgr24")
 
 # Streamlit App Implementation
@@ -73,9 +73,18 @@ if st.session_state.exercise_started:
 
     # WebRTC Configuration
     rtc_configuration = RTCConfiguration({
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}],
-        "iceTransportPolicy": "relay",
-    })
+    "iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]},
+        {"urls": ["stun:stun2.l.google.com:19302"]},
+        {
+            "urls": ["turn:relay.metered.ca:80"],
+            "username": "user",
+            "credential": "password"
+        }
+    ],
+    "iceTransportPolicy": "all",
+})
 
     # Start the livestream with the selected exercise
     webrtc_streamer(
@@ -84,8 +93,15 @@ if st.session_state.exercise_started:
         rtc_configuration=rtc_configuration,
         #video_frame_callback=video_frame_callback,
         video_processor_factory=lambda: VideoProcessor(exercise_id=selected_exercise_id),
-        media_stream_constraints={"video": True, "audio": False},
-        async_processing=True,
+        media_stream_constraints={
+        "video": {
+            "width": {"ideal": 1280},  # Desired width
+            "height": {"ideal": 720},  # Desired height
+            "frameRate": {"ideal": 30},  # Desired frame rate (optional)
+            },
+        "audio": False,
+        },
+        #async_processing=True,
     )
 else:
     st.write("Press the button to start or stop the exercise.")
