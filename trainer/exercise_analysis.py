@@ -4,7 +4,7 @@ import mediapipe as mp
 import numpy as np
 from mediapipe.framework.formats.landmark_pb2 import Landmark, LandmarkList
 from tensorflow.keras.models import load_model
-from .repetition_counter import RepetitionCounter
+from trainer.repetition_counter import RepetitionCounter
 
 
 class ExerciseAnalyzer:

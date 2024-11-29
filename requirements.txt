@@ -1,5 +1,5 @@
-streamlit
-mediapipe
-opencv-python
-tensorflow
-numpy
+streamlit==1.40.2
+mediapipe==0.10.18
+opencv-python==4.10.0.84
+tensorflow==2.18.0
+numpy==1.26.4
