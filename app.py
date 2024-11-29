@@ -3,10 +3,7 @@ from trainer.utils import process_uploaded_video
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from utils import VideoProcessor
 import streamlit as st
-import tempfile
-import os
-import uuid
-import subprocess
+from io import BytesIO
 
 # Streamlit App Implementation
 st.title("Tr_AI_ner")
@@ -71,33 +68,29 @@ if input_selection == "Webcam":
     )
 
 elif input_selection == "Video Upload":
+
+    # Placeholder for processed video
+    processed_video_bytes = BytesIO()
+
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
     if uploaded_file:
         st.video(uploaded_file)
 
         if st.button("Process Video"):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
-                temp_input_file.write(uploaded_file.read())
-                input_path = temp_input_file.name
-
-            output_path = f"{tempfile.gettempdir()}/processed_video_{uuid.uuid4().hex}.mp4"
-            reencoded_path = f"{tempfile.gettempdir()}/reencoded_video_{uuid.uuid4().hex}.mp4"
-
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
-            try:
-                with st.spinner("Processing video..."):
-                    result = process_uploaded_video(input_path, output_path, exercise)
-                    if result["success"]:
 
-                        # Display processed video
-                        st.success("Processing complete!")
-                        st.video(reencoded_path)
-                    else:
-                        st.error("Video processing failed.")
-            finally:
-                if os.path.exists(input_path):
-                    os.remove(input_path)
-                if os.path.exists(output_path):
-                    os.remove(output_path)
-                if os.path.exists(reencoded_path):
-                    os.remove(reencoded_path)
+            # Read the uploaded video into BytesIO
+            input_video_bytes = BytesIO(uploaded_file.read())
+            input_video_bytes.seek(0)  # Reset pointer
+
+            with st.spinner("Processing video..."):
+                # Process the video and write to BytesIO
+                result = process_uploaded_video(input_video_bytes, processed_video_bytes, exercise)
+
+            if result["success"]:
+                # Display processed video
+                processed_video_bytes.seek(0)  # Reset pointer for playback
+                st.success("Processing complete!")
+                st.video(processed_video_bytes)
+            else:
+                st.error("Video processing failed.")
