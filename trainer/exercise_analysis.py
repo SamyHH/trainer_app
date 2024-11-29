@@ -72,6 +72,13 @@ class ExerciseAnalyzer:
                                       min_detection_confidence=0.5,
                                       min_tracking_confidence=0.5)
 
+        # Create Repition Counter (initialize once outside if used repeatedly)
+        self.rep_counter = RepetitionCounter(
+            landmark_idx=15,
+            min_threshold=self.exercise_data['Min_Threshold'],
+            max_threshold=self.exercise_data['Max_Threshold'],
+            direction_axis='y')
+
     @staticmethod
     def calculate_distance(point1, point2):
         """
@@ -391,36 +398,24 @@ class ExerciseAnalyzer:
             connection_drawing_spec=predicted_connection_spec  # Drawing specs for connections
         )
 
+
     def start_exercise(self, frame):
         """
-        Start an interactive exercise session by analyzing a single image.
+        Process a single frame for the exercise session.
 
         Args:
-            image_np (ndarray): The input frame as a NumPy array in RGB format.
-
-        Process:
-            - Performs pose estimation with MediaPipe.
-            - Compares detected landmarks with predictions.
-            - Displays feedback and draws landmarks on the image.
+            frame (np.ndarray): A single video frame.
 
         Returns:
-            ndarray: The processed frame with annotations.
+            np.ndarray: The processed frame with overlays.
         """
 
-        # Convert frame to RGB for MediaPipe processing
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = self.pose.process(frame_rgb)
+        # Process the frame
+        #frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = self.pose.process(frame)#(frame_rgb)
 
         # Display Exercise Name
-        cv2.putText(
-            frame,
-            f"{self.exercise_data['Name']}",
-            (50, 50),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (255, 255, 255),
-            2
-        )
+        cv2.putText(frame, f"{self.exercise_data['Name']}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         if results.pose_world_landmarks:
             world_landmarks = results.pose_world_landmarks.landmark
@@ -430,41 +425,21 @@ class ExerciseAnalyzer:
                 self.current_sequence.append(frame_data)
 
                 if len(self.current_sequence) == self.sequence_length:
-                    # Prepare the sequence for model prediction
                     sequence_array = np.expand_dims(np.array(self.current_sequence), axis=0).astype(np.float32)
                     predicted_frame = self.model.predict(sequence_array, verbose=0)[0]
 
-                    # Update the sequence buffer
                     self.current_sequence.pop(0)
-
-                    # Create and update repetition counter
-                    rep_counter = RepetitionCounter(
-                        landmark_idx=15,
-                        min_threshold=self.exercise_data['Min_Threshold'],
-                        max_threshold=self.exercise_data['Max_Threshold'],
-                        direction_axis='y'
-                    )
-                    rep_counter.update(world_landmarks)
-
-                    # Calculate errors
+                    # Update Counter
+                    self.rep_counter.update(world_landmarks)
+                    # Calculate Error
                     errors, self.error_indices = self.calculate_errors(world_landmarks, predicted_frame)
-
-                    # Display feedback and repetition count
-                    self.display_feedback(frame, errors, counter=rep_counter.get_count())
-
-                    # Optionally draw predicted landmarks
+                    # Show Feedback to the User
+                    self.display_feedback(frame, errors, counter=self.rep_counter.get_count())
+                    # Draw predicted Landmarks
                     if self.draw_predicted_lm:
                         self.draw_predicted_landmarks(frame, results, predicted_frame)
             else:
-                cv2.putText(
-                    frame,
-                    "Adjust Position, joints not visible",
-                    (50, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1,
-                    (0, 0, 255),
-                    2
-                )
+                cv2.putText(frame, "Adjust Position, joints not visible", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         if results.pose_landmarks:
             self.draw_landmarks(frame, results)
