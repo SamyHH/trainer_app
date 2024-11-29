@@ -86,6 +86,12 @@ if input_selection == "Video Upload":
 
             # Display the processed video
             if result["success"] and result["processed_video_bytes"]:
+                st.download_button(
+                        label="Download Processed Video",
+                        data=result["processed_video_bytes"],
+                        file_name="processed_video.mp4",
+                        mime="video/mp4",
+                    )
                 processed_video_bytes = result["processed_video_bytes"]
                 print(f"Processed video size: {processed_video_bytes.getbuffer().nbytes} bytes")
                 if processed_video_bytes.getbuffer().nbytes > 0:

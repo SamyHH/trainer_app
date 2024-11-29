@@ -20,130 +20,130 @@ def reencode_video(input_path, output_path):
         raise
 
 
-# def process_uploaded_video(input_video_bytes, exercise_analyzer):
-#     """
-#     Process the uploaded video frame by frame using start_exercise.
-#     Args:
-#         input_video_bytes (BytesIO): Input video as a BytesIO object.
-#         exercise_analyzer (ExerciseAnalyzer): Instance of ExerciseAnalyzer.
-
-#     Returns:
-#         dict: A dictionary containing:
-#             - 'success' (bool): Whether the video was processed successfully.
-#             - 'processed_video_bytes' (BytesIO): Processed video as a BytesIO object.
-#             - 'frames_processed' (int): Number of frames processed.
-#     """
-#     processed_video_bytes = BytesIO()
-#     try:
-#         # Write input BytesIO to a temporary file for OpenCV compatibility
-#         input_temp_file = f"/tmp/input_video_{uuid.uuid4().hex}.mp4"
-#         with open(input_temp_file, "wb") as f:
-#             f.write(input_video_bytes.read())
-
-#         # Open input video
-#         cap = cv2.VideoCapture(input_temp_file)
-#         if not cap.isOpened():
-#             print("Error: Unable to open input video file.")
-#             return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
-#         # Video properties
-#         fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
-#         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-#         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-#         # Write to an in-memory file for processed video
-#         output_temp_file = f"/tmp/output_video_{uuid.uuid4().hex}.mp4"
-#         out = cv2.VideoWriter(output_temp_file, fourcc, fps, (width, height))
-#         if not out.isOpened():
-#             print("Error: Unable to initialize VideoWriter.")
-#             return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
-#         # Process frames
-#         frames_processed = 0
-#         while cap.isOpened():
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-
-#             # Process frame
-#             processed_frame = exercise_analyzer.start_exercise(frame)
-#             processed_frame = cv2.resize(processed_frame, (width, height))
-#             out.write(processed_frame)
-#             frames_processed += 1
-#             print(f"Processed frame {frames_processed}")
-
-#         cap.release()
-#         out.release()
-
-#         # Write output file to BytesIO
-#         with open(output_temp_file, "rb") as f:
-#             processed_video_bytes.write(f.read())
-
-#         # Clean up
-#         os.remove(input_temp_file)
-#         os.remove(output_temp_file)
-
-#         processed_video_bytes.seek(0)  # Reset BytesIO pointer
-#         print("Video processing complete.")
-#         return {"success": True, "processed_video_bytes": processed_video_bytes, "frames_processed": frames_processed}
-#     except Exception as e:
-#         print(f"Error processing video: {e}")
-#         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
-
 def process_uploaded_video(input_video_bytes, exercise_analyzer):
+    """
+    Process the uploaded video frame by frame using start_exercise.
+    Args:
+        input_video_bytes (BytesIO): Input video as a BytesIO object.
+        exercise_analyzer (ExerciseAnalyzer): Instance of ExerciseAnalyzer.
+
+    Returns:
+        dict: A dictionary containing:
+            - 'success' (bool): Whether the video was processed successfully.
+            - 'processed_video_bytes' (BytesIO): Processed video as a BytesIO object.
+            - 'frames_processed' (int): Number of frames processed.
+    """
     processed_video_bytes = BytesIO()
     try:
+        # Write input BytesIO to a temporary file for OpenCV compatibility
         input_temp_file = f"/tmp/input_video_{uuid.uuid4().hex}.mp4"
-        output_temp_file = f"/tmp/output_video_{uuid.uuid4().hex}.mp4"
-        reencoded_temp_file = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
-
-        # Write input video to temp file
         with open(input_temp_file, "wb") as f:
             f.write(input_video_bytes.read())
 
+        # Open input video
         cap = cv2.VideoCapture(input_temp_file)
         if not cap.isOpened():
             print("Error: Unable to open input video file.")
             return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
 
+        # Video properties
         fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
+        # Write to an in-memory file for processed video
+        output_temp_file = f"/tmp/output_video_{uuid.uuid4().hex}.mp4"
         out = cv2.VideoWriter(output_temp_file, fourcc, fps, (width, height))
-        frames_processed = 0
+        if not out.isOpened():
+            print("Error: Unable to initialize VideoWriter.")
+            return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
 
+        # Process frames
+        frames_processed = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
+
+            # Process frame
             processed_frame = exercise_analyzer.start_exercise(frame)
             processed_frame = cv2.resize(processed_frame, (width, height))
             out.write(processed_frame)
             frames_processed += 1
+            print(f"Processed frame {frames_processed}")
 
         cap.release()
         out.release()
 
-        # Re-encode the processed video
-        reencode_video(output_temp_file, reencoded_temp_file)
-
-        # Write re-encoded video to BytesIO
-        with open(reencoded_temp_file, "rb") as f:
+        # Write output file to BytesIO
+        with open(output_temp_file, "rb") as f:
             processed_video_bytes.write(f.read())
 
-        # Clean up temp files
+        # Clean up
         os.remove(input_temp_file)
         os.remove(output_temp_file)
-        os.remove(reencoded_temp_file)
 
-        processed_video_bytes.seek(0)
+        processed_video_bytes.seek(0)  # Reset BytesIO pointer
+        print("Video processing complete.")
         return {"success": True, "processed_video_bytes": processed_video_bytes, "frames_processed": frames_processed}
     except Exception as e:
         print(f"Error processing video: {e}")
         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
+
+# def process_uploaded_video(input_video_bytes, exercise_analyzer):
+#     processed_video_bytes = BytesIO()
+#     try:
+#         input_temp_file = f"/tmp/input_video_{uuid.uuid4().hex}.mp4"
+#         output_temp_file = f"/tmp/output_video_{uuid.uuid4().hex}.mp4"
+#         reencoded_temp_file = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
+
+#         # Write input video to temp file
+#         with open(input_temp_file, "wb") as f:
+#             f.write(input_video_bytes.read())
+
+#         cap = cv2.VideoCapture(input_temp_file)
+#         if not cap.isOpened():
+#             print("Error: Unable to open input video file.")
+#             return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
+
+#         fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
+#         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+#         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+#         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+#         out = cv2.VideoWriter(output_temp_file, fourcc, fps, (width, height))
+#         frames_processed = 0
+
+#         while cap.isOpened():
+#             ret, frame = cap.read()
+#             if not ret:
+#                 break
+#             processed_frame = exercise_analyzer.start_exercise(frame)
+#             processed_frame = cv2.resize(processed_frame, (width, height))
+#             out.write(processed_frame)
+#             frames_processed += 1
+
+#         cap.release()
+#         out.release()
+
+#         # Re-encode the processed video
+#         reencode_video(output_temp_file, reencoded_temp_file)
+
+#         # Write re-encoded video to BytesIO
+#         with open(reencoded_temp_file, "rb") as f:
+#             processed_video_bytes.write(f.read())
+
+#         # Clean up temp files
+#         os.remove(input_temp_file)
+#         os.remove(output_temp_file)
+#         os.remove(reencoded_temp_file)
+
+#         processed_video_bytes.seek(0)
+#         return {"success": True, "processed_video_bytes": processed_video_bytes, "frames_processed": frames_processed}
+#     except Exception as e:
+#         print(f"Error processing video: {e}")
+#         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
 
 
 
