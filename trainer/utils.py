@@ -21,7 +21,7 @@ def process_uploaded_video(video_path, output_path, exercise_analyzer):
     fps = fps if fps > 0 else 30  # Default FPS if invalid
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # Use H.264 codec
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use H.264 codec
 
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
