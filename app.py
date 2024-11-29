@@ -80,29 +80,24 @@ elif input_selection == "Video Upload":
                 temp_input_file.write(uploaded_file.read())
                 input_path = temp_input_file.name
 
-            output_path = f"/tmp/processed_video_{uuid.uuid4().hex}.mp4"
-            reencoded_path = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
+            output_path = f"{tempfile.gettempdir()}/processed_video_{uuid.uuid4().hex}.mp4"
+            reencoded_path = f"{tempfile.gettempdir()}/reencoded_video_{uuid.uuid4().hex}.mp4"
 
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
-            #try:
-            with st.spinner("Processing video..."):
-                result = process_uploaded_video(input_path, output_path, exercise)
-                if result["success"]:
-                    # Re-encode video
-                    # ffmpeg_command = [
-                    #     'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
-                    # ]
-                    # subprocess.run(ffmpeg_command)
+            try:
+                with st.spinner("Processing video..."):
+                    result = process_uploaded_video(input_path, output_path, exercise)
+                    if result["success"]:
 
-                    # Display processed video
-                    st.success("Processing complete!")
-                    st.video(reencoded_path)
-                else:
-                    st.error("Video processing failed.")
-            # finally:
-            #     if os.path.exists(input_path):
-            #         os.remove(input_path)
-            #     if os.path.exists(output_path):
-            #         os.remove(output_path)
-            #     if os.path.exists(reencoded_path):
-            #         os.remove(reencoded_path)
+                        # Display processed video
+                        st.success("Processing complete!")
+                        st.video(reencoded_path)
+                    else:
+                        st.error("Video processing failed.")
+            finally:
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+                if os.path.exists(output_path):
+                    os.remove(output_path)
+                if os.path.exists(reencoded_path):
+                    os.remove(reencoded_path)
