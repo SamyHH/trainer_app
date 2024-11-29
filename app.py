@@ -6,7 +6,7 @@ import streamlit as st
 import tempfile
 import os
 import uuid
-
+import subprocess
 
 # Streamlit App Implementation
 st.title("Tr_AI_ner")
@@ -72,33 +72,37 @@ if input_selection == "Webcam":
 
 elif input_selection == "Video Upload":
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
-
-    if uploaded_file is not None:
+    if uploaded_file:
         st.video(uploaded_file)
 
         if st.button("Process Video"):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as input_tempfile:
-                input_tempfile.write(uploaded_file.read())
-                input_path = input_tempfile.name
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_input_file:
+                temp_input_file.write(uploaded_file.read())
+                input_path = temp_input_file.name
 
-            # Unique output file
             output_path = f"/tmp/processed_video_{uuid.uuid4().hex}.mp4"
+            reencoded_path = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
 
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
-            # Process the video
             try:
                 with st.spinner("Processing video..."):
-                    process_uploaded_video(input_path, output_path, exercise)
+                    result = process_uploaded_video(input_path, output_path, exercise)
+                    if result["success"]:
+                        # Re-encode video
+                        ffmpeg_command = [
+                            'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
+                        ]
+                        subprocess.run(ffmpeg_command)
 
-                # Display Processed Video
-                if os.path.exists(output_path):
-                    st.success("Processing complete!")
-                    st.video(output_path)
-                else:
-                    st.error("Failed to process video.")
+                        # Display processed video
+                        st.success("Processing complete!")
+                        st.video(reencoded_path)
+                    else:
+                        st.error("Video processing failed.")
             finally:
-                # Clean up temporary input file
                 if os.path.exists(input_path):
                     os.remove(input_path)
                 if os.path.exists(output_path):
                     os.remove(output_path)
+                if os.path.exists(reencoded_path):
+                    os.remove(reencoded_path)
