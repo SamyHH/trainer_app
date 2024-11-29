@@ -67,9 +67,7 @@ if input_selection == "Webcam":
         },
     )
 
-elif input_selection == "Video Upload":
-
-    # Placeholder for processed video
+if input_selection == "Video Upload":
     processed_video_bytes = BytesIO()
 
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
@@ -79,17 +77,14 @@ elif input_selection == "Video Upload":
         if st.button("Process Video"):
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
 
-            # Read the uploaded video into BytesIO
             input_video_bytes = BytesIO(uploaded_file.read())
-            input_video_bytes.seek(0)  # Reset pointer
+            input_video_bytes.seek(0)
 
             with st.spinner("Processing video..."):
-                # Process the video and write to BytesIO
                 result = process_uploaded_video(input_video_bytes, processed_video_bytes, exercise)
 
             if result["success"]:
-                # Display processed video
-                processed_video_bytes.seek(0)  # Reset pointer for playback
+                processed_video_bytes.seek(0)
                 st.success("Processing complete!")
                 st.video(processed_video_bytes)
             else:
