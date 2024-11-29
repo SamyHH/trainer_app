@@ -99,10 +99,10 @@ elif input_selection == "Video Upload":
                         st.video(reencoded_path)
                     else:
                         st.error("Video processing failed.")
-            finally:
-                if os.path.exists(input_path):
-                    os.remove(input_path)
-                if os.path.exists(output_path):
-                    os.remove(output_path)
-                if os.path.exists(reencoded_path):
-                    os.remove(reencoded_path)
+            # finally:
+            #     if os.path.exists(input_path):
+            #         os.remove(input_path)
+            #     if os.path.exists(output_path):
+            #         os.remove(output_path)
+            #     if os.path.exists(reencoded_path):
+            #         os.remove(reencoded_path)
