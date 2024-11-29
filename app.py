@@ -68,24 +68,36 @@ if input_selection == "Webcam":
     )
 
 if input_selection == "Video Upload":
-    processed_video_bytes = BytesIO()
-
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
     if uploaded_file:
+        # Display the original uploaded video
         st.video(uploaded_file)
 
         if st.button("Process Video"):
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
 
+            # Read video file into BytesIO
             input_video_bytes = BytesIO(uploaded_file.read())
             input_video_bytes.seek(0)
 
+            # Process the video
             with st.spinner("Processing video..."):
-                result = process_uploaded_video(input_video_bytes, processed_video_bytes, exercise)
+                result = process_uploaded_video(input_video_bytes, exercise)
 
-            if result["success"]:
-                processed_video_bytes.seek(0)
-                st.success("Processing complete!")
-                st.video(processed_video_bytes)
-            else:
-                st.error("Video processing failed.")
+            # Display the processed video
+            if result["success"] and result["processed_video_bytes"]:
+                processed_video_bytes = result["processed_video_bytes"]
+                print(f"Processed video size: {processed_video_bytes.getbuffer().nbytes} bytes")
+                if processed_video_bytes.getbuffer().nbytes > 0:
+                    st.success("Processing complete!")
+                    processed_video_bytes.seek(0)
+                    st.video(processed_video_bytes)
+                    st.download_button(
+                        label="Download Processed Video",
+                        data=result["processed_video_bytes"],
+                        file_name="processed_video.mp4",
+                        mime="video/mp4",
+                    )
+
+                else:
+                    st.error("Processed video is empty.")
