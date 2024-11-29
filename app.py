@@ -84,21 +84,21 @@ elif input_selection == "Video Upload":
             reencoded_path = f"/tmp/reencoded_video_{uuid.uuid4().hex}.mp4"
 
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
-            try:
-                with st.spinner("Processing video..."):
-                    result = process_uploaded_video(input_path, output_path, exercise)
-                    if result["success"]:
-                        # Re-encode video
-                        # ffmpeg_command = [
-                        #     'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
-                        # ]
-                        # subprocess.run(ffmpeg_command)
+            #try:
+            with st.spinner("Processing video..."):
+                result = process_uploaded_video(input_path, output_path, exercise)
+                if result["success"]:
+                    # Re-encode video
+                    # ffmpeg_command = [
+                    #     'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
+                    # ]
+                    # subprocess.run(ffmpeg_command)
 
-                        # Display processed video
-                        st.success("Processing complete!")
-                        st.video(reencoded_path)
-                    else:
-                        st.error("Video processing failed.")
+                    # Display processed video
+                    st.success("Processing complete!")
+                    st.video(reencoded_path)
+                else:
+                    st.error("Video processing failed.")
             # finally:
             #     if os.path.exists(input_path):
             #         os.remove(input_path)
