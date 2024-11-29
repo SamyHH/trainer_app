@@ -89,10 +89,10 @@ elif input_selection == "Video Upload":
                     result = process_uploaded_video(input_path, output_path, exercise)
                     if result["success"]:
                         # Re-encode video
-                        ffmpeg_command = [
-                            'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
-                        ]
-                        subprocess.run(ffmpeg_command)
+                        # ffmpeg_command = [
+                        #     'ffmpeg', '-i', output_path, '-vcodec', 'libx264', '-acodec', 'aac', reencoded_path
+                        # ]
+                        # subprocess.run(ffmpeg_command)
 
                         # Display processed video
                         st.success("Processing complete!")
