@@ -71,7 +71,7 @@ if input_selection == "Video Upload":
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
     if uploaded_file:
         # Display the original uploaded video
-        st.video(uploaded_file)
+        #st.video(uploaded_file)
 
         if st.button("Process Video"):
             exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
@@ -86,18 +86,12 @@ if input_selection == "Video Upload":
 
             # Display the processed video
             if result["success"] and result["processed_video_bytes"]:
-                st.download_button(
-                        label="Download Processed Video",
-                        data=result["processed_video_bytes"],
-                        file_name="processed_video.mp4",
-                        mime="video/mp4",
-                    )
                 processed_video_bytes = result["processed_video_bytes"]
                 print(f"Processed video size: {processed_video_bytes.getbuffer().nbytes} bytes")
                 if processed_video_bytes.getbuffer().nbytes > 0:
                     st.success("Processing complete!")
                     processed_video_bytes.seek(0)
-                    st.video(processed_video_bytes)
+                    #st.video(processed_video_bytes)
                     st.download_button(
                         label="Download Processed Video",
                         data=result["processed_video_bytes"],
