@@ -79,10 +79,10 @@ class ExerciseAnalyzer:
 
         # Create Repition Counter (initialize once outside if used repeatedly)
         self.rep_counter = RepetitionCounter(
-            landmark_idx=15,
+            landmark_idx=self.exercise_data['Rep_Landmark_ID'],
             min_threshold=self.exercise_data['Min_Threshold'],
             max_threshold=self.exercise_data['Max_Threshold'],
-            direction_axis='y')
+            direction_axis=self.exercise_data['Rep_Axis'],)
 
     @staticmethod
     def calculate_distance(point1, point2):
