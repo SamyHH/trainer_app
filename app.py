@@ -17,7 +17,7 @@ input_options = [
     "Video Upload"
 ]
 
-input_selection = st.radio("Choose your inout", input_options)
+input_selection = st.radio("Choose your input", input_options)
 
 # Radio buttons for exercise selection
 exercise_options = [
