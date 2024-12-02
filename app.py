@@ -5,6 +5,8 @@ from utils import VideoProcessor
 import streamlit as st
 from io import BytesIO
 
+api_endpoint = st.secrets["API_ENDPOINT"]
+
 # Streamlit App Implementation
 st.title("Tr_AI_ner")
 st.header("Start to check your training!")
@@ -56,7 +58,8 @@ if input_selection == "Webcam":
         key="exercise",
         mode=WebRtcMode.SENDRECV,
         rtc_configuration=rtc_configuration,
-        video_processor_factory=lambda: VideoProcessor(exercise_id=selected_exercise_id),
+        video_processor_factory=lambda: VideoProcessor(exercise_id=selected_exercise_id,
+                                                       api_endpoint=api_endpoint),
         media_stream_constraints={
         "video": {
             "width": {"ideal": 1280},
@@ -71,7 +74,8 @@ if input_selection == "Video Upload":
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
     if uploaded_file:
         if st.button("Process Video"):
-            exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id)
+            exercise = ExerciseAnalyzer(exercise_id=selected_exercise_id,
+                                        api_endpoint=api_endpoint)
 
             # Read video file into BytesIO
             input_video_bytes = BytesIO(uploaded_file.read())
