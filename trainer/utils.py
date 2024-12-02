@@ -54,7 +54,7 @@ def process_uploaded_video(input_video_bytes, exercise_analyzer):
             processed_frame = cv2.resize(processed_frame, (width, height))
             out.write(processed_frame)
             frames_processed += 1
-            print(f"Processed frame {frames_processed}")
+            #print(f"Processed frame {frames_processed}")
 
         cap.release()
         out.release()
@@ -63,16 +63,22 @@ def process_uploaded_video(input_video_bytes, exercise_analyzer):
         with open(output_temp_file, "rb") as f:
             processed_video_bytes.write(f.read())
 
-        # Clean up
-        os.remove(input_temp_file)
-        os.remove(output_temp_file)
-
         processed_video_bytes.seek(0)  # Reset BytesIO pointer
         print("Video processing complete.")
         return {"success": True, "processed_video_bytes": processed_video_bytes, "frames_processed": frames_processed}
     except Exception as e:
         print(f"Error processing video: {e}")
         return {"success": False, "processed_video_bytes": None, "frames_processed": 0}
+
+    finally:
+        # Cleanup temporary files
+        if os.path.exists(input_temp_file):
+            os.remove(input_temp_file)
+            print(f"Deleted input temp file: {input_temp_file}")
+
+        if os.path.exists(output_temp_file):
+            os.remove(output_temp_file)
+            print(f"Deleted output temp file: {output_temp_file}")
 
 def process_webcam_video(exercise_analyzer, display_callback, placeholder=None):
     """

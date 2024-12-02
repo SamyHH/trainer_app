@@ -1,10 +1,13 @@
 import math
+import requests
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
 from mediapipe.framework.formats.landmark_pb2 import Landmark, LandmarkList
 from tensorflow.keras.models import load_model
 from trainer.repetition_counter import RepetitionCounter
+from trainer.params import exercise_list
 
 
 class ExerciseAnalyzer:
@@ -37,7 +40,8 @@ class ExerciseAnalyzer:
                  sequence_length=10,
                  error_threshold=0.1,
                  draw_predicted_lm=True,
-                 visibility_threshold=0.5):
+                 visibility_threshold=0.5,
+                 api_endpoint=None):
         """
         Initialize the ExerciseAnalyzer class with exercise-specific parameters.
 
@@ -55,6 +59,7 @@ class ExerciseAnalyzer:
         self.visibibility_threshold = visibility_threshold
         self.current_sequence = []
         self.error_indices = []
+        self.api_endpoint = api_endpoint
 
         # Load exercise-specific data
         self.exercise_data = self.get_exercise_data()
@@ -92,6 +97,74 @@ class ExerciseAnalyzer:
             float: The Euclidean distance between point1 and point2.
         """
         return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2 + (point1[2] - point2[2])**2)
+
+    @staticmethod
+    def load_downloaded_model(model_path):
+        """
+        Load a Keras model from a local file.
+
+        Args:
+            model_path (str): Path to the Keras model file.
+
+        Returns:
+            keras.Model: Loaded Keras model.
+        """
+
+        try:
+            if not os.path.exists(model_path):
+                print(f"Error: Model file {model_path} does not exist.")
+                return None
+
+            file_size = os.path.getsize(model_path)
+            print(file_size)
+            if file_size <= 0:
+                print(f"Error: Model file {model_path} is empty.")
+                return None
+
+            model = load_model(model_path)
+            print("Model loaded successfully!")
+
+            # Optional: Delete the model file after loading (ensure load is successful first)
+            os.remove(model_path)
+            print(f"Model file {model_path} deleted successfully.")
+
+            return model
+        except Exception as e:
+            print(f"Error loading model from {model_path}: {e}")
+            return None
+
+    def download_model(self, save_path):
+        """
+        Download the Keras model from the FastAPI endpoint and save it locally.
+
+        Args:
+            api_url (str): URL of the FastAPI model download endpoint.
+            save_path (str): Path to save the downloaded model file.
+
+        Returns:
+            str: Path to the saved model.
+        """
+
+        # Build Endpoint
+        endpoint = self.api_endpoint
+        params = {
+            'exercise_id': self.exercise_id
+        }
+
+        # Get Data
+        response = requests.get(endpoint,
+                                params=params,
+                                stream=True)
+
+        if response.status_code == 200:
+            with open(save_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"Model downloaded and saved to {save_path}")
+            return save_path
+        else:
+            print(f"Failed to download model: {response.status_code}, {response.text}")
+            return None
 
 
     def are_all_landmarks_visible(self, world_landmarks):
@@ -278,29 +351,6 @@ class ExerciseAnalyzer:
         Returns:
             dict: A dictionary containing exercise-related information such as landmarks, connections, and models.
         """
-        exercise_list = {
-            1: {
-                'Name': 'Barbell Biceps Curl',
-                'Landmarks': [11, 12, 13, 14, 15, 16, 23, 24],
-                'ModelID': "barbell_biceps_curl",
-                'Min_Threshold': -0.15,
-                'Max_Threshold': -0.3
-            },
-            2: {
-                'Name': 'Squats',
-                'Landmarks': [11, 12, 23, 24, 25, 26, 27, 28],
-                'ModelID': "squats",
-                'Min_Threshold': 0.6,
-                'Max_Threshold': 0.6
-            },
-            3: {
-                'Name': 'Deadlift',
-                'Landmarks': [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28],
-                'ModelID': "deadlift",
-                'Min_Threshold': 0.6,
-                'Max_Threshold': 0.6
-            }
-        }
 
         exercise_data = exercise_list.get(self.exercise_id)
 
@@ -313,12 +363,12 @@ class ExerciseAnalyzer:
             exercise_data['IndexMapping'] = {exercise_data['Landmarks'][i]: new_index_list[i] for i in range(len(exercise_data['Landmarks']))}
 
             # Load the model only when this function is called
-            model_path = f"model/{exercise_data['ModelID']}.keras"
-            try:
-                model = load_model(model_path)
-                exercise_data['Model'] = model
-            except Exception as e:
-                print(f"Error loading model from {model_path}: {e}")
+            save_path = "/tmp/model.keras"
+            model_file_path = self.download_model(save_path)
+            if model_file_path:
+                exercise_data['Model'] = self.load_downloaded_model(model_file_path)
+            else:
+                print(f"Error loading model from {model_file_path}")
                 exercise_data['Model'] = None
 
         return exercise_data
