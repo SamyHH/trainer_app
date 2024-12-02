@@ -10,10 +10,21 @@ def streamlit_display_callback(frame, placeholder):
     placeholder.image(frame, channels="RGB")
 
 class VideoProcessor(VideoTransformerBase):
-    def __init__(self, exercise_id, api_endpoint):
+    def __init__(self,
+                 exercise_id,
+                 draw_predicted_lm,
+                 error_threshold,
+                 visibility_threshold,
+                 api_endpoint,
+                 sequence_length):
         print(f"Initializing VideoProcessor with exercise_id: {exercise_id}")
         self.exercise = ExerciseAnalyzer(exercise_id=exercise_id,
-                                         api_endpoint=api_endpoint)
+                                            draw_predicted_lm=draw_predicted_lm,
+                                            error_threshold=error_threshold,
+                                            visibility_threshold=visibility_threshold,
+                                            api_endpoint=api_endpoint,
+                                            sequence_length=sequence_length
+                                        )
 
     def recv(self, frame):
         frame = frame.to_ndarray(format="bgr24")
