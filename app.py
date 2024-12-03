@@ -41,7 +41,7 @@ def render_main_page():
     with col2:
         st.image("images/image1_logo.png", width=300)
 
-    st.markdown("<h1 style='color: black;font-size: 70px;text-align: center'>Tr_AI_Ner</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 font-size: 70px;text-align: center'>Tr_AI_Ner</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='color: #ff4b4b;font-size: 50px;text-align: center;'>Fitness AI coach</h2>", unsafe_allow_html=True)
 
     st.markdown("""
