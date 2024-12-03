@@ -178,7 +178,7 @@ def render_exercise_start_page():
         webrtc_streamer(
             key="exercise",
             mode=WebRtcMode.SENDRECV,
-            #rtc_configuration=rtc_configuration,
+            rtc_configuration=rtc_configuration,
             video_processor_factory=lambda: VideoProcessor(exercise_id=exercise_id,
                                                            draw_predicted_lm=draw_predicted_lm,
                                                            error_threshold=error_threshold,
