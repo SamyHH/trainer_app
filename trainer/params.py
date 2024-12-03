@@ -1,3 +1,4 @@
+# Parameter used for exercises
 exercise_list = {
             1: {
                 'Name': 'Barbell Biceps Curl',
@@ -27,3 +28,6 @@ exercise_list = {
                 'Max_Threshold': 0.0
             }
         }
+
+# Fist of Landmarks, which will not be adjusted for the predicted Frames
+fixed_landmark_idx = [11, 12, 23, 24]

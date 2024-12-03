@@ -7,7 +7,7 @@ import numpy as np
 from mediapipe.framework.formats.landmark_pb2 import Landmark, LandmarkList
 from tensorflow.keras.models import load_model
 from trainer.repetition_counter import RepetitionCounter
-from trainer.params import exercise_list
+from trainer.params import exercise_list, fixed_landmark_idx
 
 
 class ExerciseAnalyzer:
@@ -404,10 +404,16 @@ class ExerciseAnalyzer:
             # Scale this vector to be added to actual_coords, optionally apply a scaling factor
             predicted_landmark_coords = actual_coords + direction_vector
 
-            # Set the predicted values for each coordinate
-            predicted_landmark.x = predicted_landmark_coords[0]
-            predicted_landmark.y = predicted_landmark_coords[1]
-            predicted_landmark.z = predicted_landmark_coords[2]
+            if idx in fixed_landmark_idx:
+                # Set user landmark coordinates so they will not scale with predicted values
+                predicted_landmark.x = landmarks[idx].x
+                predicted_landmark.y = landmarks[idx].y
+                predicted_landmark.z = landmarks[idx].z
+            else:
+                # Set the predicted values for each coordinate
+                predicted_landmark.x = predicted_landmark_coords[0]
+                predicted_landmark.y = predicted_landmark_coords[1]
+                predicted_landmark.z = predicted_landmark_coords[2]
 
             # Append the new predicted landmark to the predicted_landmarks list
             predicted_landmarks.landmark.append(predicted_landmark)
