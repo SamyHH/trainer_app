@@ -104,16 +104,20 @@ def render_exercise_selection_page():
 # Exercise Start Page
 def render_exercise_start_page():
     # Display the exercise-specific details
+    _, col2, _ = st.columns([0.5, 1, 0.3])  # Adjust column ratios as needed
     selected_exercise = st.session_state.selected_exercise_id
     if selected_exercise == 1:
-        st.title("Curl Bicep")
-        st.image("images/image2_curl.png", width=400)
+        with col2:
+            st.title("Curl Bicep")
+            st.image("https://hips.hearstapps.com/hmg-prod/images/workouts/2016/03/dumbbellcurl-1457043876.gif?resize=1200:*", width=400)
     elif selected_exercise == 2:
-        st.title("Squat")
-        st.image("images/image3_squat.png", width=400)
+        with col2:
+            st.title("Squat")
+            st.image("https://i.pinimg.com/originals/63/be/5f/63be5f70cad75c78074a6201a854030c.gif", width=400)
     elif selected_exercise == 3:
-        st.title("Deadlift")
-        st.image("images/image7_dead.png", width=400)
+        with col2:
+            st.title("Deadlift")
+            st.image("https://hips.hearstapps.com/hmg-prod/images/workouts/2016/03/barbelldeadlift-1457038089.gif?resize=1200:*", width=400)
 
     st.info("Please stay in front of the camera and follow your Tr_AI_ner's advice.")
 
