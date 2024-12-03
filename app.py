@@ -104,7 +104,7 @@ def render_exercise_selection_page():
 # Exercise Start Page
 def render_exercise_start_page():
     # Display the exercise-specific details
-    _, col2, _ = st.columns([0.5, 1, 0.3])  # Adjust column ratios as needed
+    _, col2, _ = st.columns([0.5, 2, 0.3])  # Adjust column ratios as needed
     selected_exercise = st.session_state.selected_exercise_id
     if selected_exercise == 1:
         with col2:
