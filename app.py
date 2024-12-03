@@ -16,7 +16,7 @@ if "current_page" not in st.session_state:
 
 # Exercise mapping
 exercise_mapping = {
-    "Curl Bicep": 1,
+    "Dumbbell Biceps Curl": 1,
     "Squat": 2,
     "Deadlift": 3
 }
@@ -80,7 +80,7 @@ def render_exercise_selection_page():
         ]
 
     button_names = [
-        "Curl Bicep",
+        "Dumbbell Biceps Curl",
         "Squat",
         "Deadlift",
         "Jumping jack",
@@ -108,7 +108,7 @@ def render_exercise_start_page():
     selected_exercise = st.session_state.selected_exercise_id
     if selected_exercise == 1:
         with col2:
-            st.title("Curl Bicep")
+            st.title("Dumbbell Biceps Curl")
             st.image("https://hips.hearstapps.com/hmg-prod/images/workouts/2016/03/dumbbellcurl-1457043876.gif?resize=1200:*", width=400)
     elif selected_exercise == 2:
         with col2:
