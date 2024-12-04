@@ -18,7 +18,10 @@ if "current_page" not in st.session_state:
 exercise_mapping = {
     "Dumbbell Biceps Curl": 1,
     "Squat": 2,
-    "Deadlift": 3
+    "Deadlift": 3,
+    "Jumping Jack": 4,
+    "Plank": 5,
+    "Push up": 6
 }
 
 # Control which page is visible
@@ -83,7 +86,7 @@ def render_exercise_selection_page():
         "Dumbbell Biceps Curl",
         "Squat",
         "Deadlift",
-        "Jumping jack",
+        "Jumping Jack",
         "Plank",
         "Push up"
         ]  # Define different names for each button
@@ -103,6 +106,7 @@ def render_exercise_selection_page():
 
 # Exercise Start Page
 def render_exercise_start_page():
+    exercise_implemented = True
     # Display the exercise-specific details
     _, col2, _ = st.columns([0.5, 2, 0.3])  # Adjust column ratios as needed
     selected_exercise = st.session_state.selected_exercise_id
@@ -118,116 +122,128 @@ def render_exercise_start_page():
         with col2:
             st.title("Deadlift")
             st.image("https://hips.hearstapps.com/hmg-prod/images/workouts/2016/03/barbelldeadlift-1457038089.gif?resize=1200:*", width=400)
+    else:
+        with col2:
+            st.title("ERROR 404")
+            st.subheader("Not yet implemented")
+            if selected_exercise == 4:
+                st.image("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2ZqaG95ZDF6MTBwMGViODB3Z3RxZmJoZWpwMDUxOG9zN2dqM3FqMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5xtDarDazM7NnYvWIyQ/giphy.webp", width=400)
+            elif selected_exercise == 5:
+                st.image("https://static.wikia.nocookie.net/edwikia/images/0/0d/Plank.png", width=400)
+            elif selected_exercise == 6:
+                st.video("https://www.youtube.com/watch?v=vCadcBR95oU")
+            exercise_implemented = False
 
-    st.info("Please stay in front of the camera and follow your Tr_AI_ner's advice.")
+    if exercise_implemented:
+        st.info("Please stay in front of the camera and follow your Tr_AI_ner's advice.")
 
 
-    # Sidebar for exercise input options
-    with st.sidebar:
-        st.button("Exercise Selection", on_click=lambda: setattr(st.session_state, "current_page", "exercise_selection"))
+        # Sidebar for exercise input options
+        with st.sidebar:
+            st.button("Exercise Selection", on_click=lambda: setattr(st.session_state, "current_page", "exercise_selection"))
 
-        st.header("Input Options")
-        exercise_id = st.session_state.selected_exercise_id
+            st.header("Input Options")
+            exercise_id = st.session_state.selected_exercise_id
 
-        input_options = ["Webcam", "Video Upload"]
-        input_selection = st.radio("Choose your input", input_options)
+            input_options = ["Webcam", "Video Upload"]
+            input_selection = st.radio("Choose your input", input_options)
 
-        # User-configurable options
-        st.subheader("Configure Exercise Parameters")
+            # User-configurable options
+            st.subheader("Configure Exercise Parameters")
 
-        draw_predicted_lm = st.checkbox(
-            "Draw Predicted Landmarks",
-            value=True
-        )
+            draw_predicted_lm = st.checkbox(
+                "Draw Predicted Landmarks",
+                value=True
+            )
 
-        error_threshold = st.slider(
-            "Error Threshold (tolerance for significant errors)",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.1,
-            step=0.1
-        )
+            error_threshold = st.slider(
+                "Error Threshold (tolerance for significant errors)",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.1,
+                step=0.1
+            )
 
-        visibility_threshold = st.slider(
-            "Visibility Threshold (minimum visibility score for a landmark)",
-            min_value=-10.0,
-            max_value=10.0,
-            value=0.5,
-            step=0.1
-        )
+            visibility_threshold = st.slider(
+                "Visibility Threshold (minimum visibility score for a landmark)",
+                min_value=-10.0,
+                max_value=10.0,
+                value=0.5,
+                step=0.1
+            )
 
-        sequence_length = st.slider(
-            "Sequence Length (number of frames to analyze)",
-            min_value=1,
-            max_value=30,
-            value=10,
-            step=1
-        )
+            sequence_length = st.slider(
+                "Sequence Length (number of frames to analyze)",
+                min_value=1,
+                max_value=30,
+                value=10,
+                step=1
+            )
 
-    if input_selection == "Webcam":
-        rtc_configuration = RTCConfiguration({
-            "iceServers": [
-                {"urls": ["stun:stun.l.google.com:19302"]},
-                {"urls": ["stun:stun1.l.google.com:19302"]},
-                {"urls": ["stun:stun2.l.google.com:19302"]},
-                {
-                    "urls": ["turn:relay.metered.ca:80"],
-                    "username": "user",
-                    "credential": "password"
-                }
-            ],
-            "iceTransportPolicy": "all",
-        })
+        if input_selection == "Webcam":
+            rtc_configuration = RTCConfiguration({
+                "iceServers": [
+                    {"urls": ["stun:stun.l.google.com:19302"]},
+                    {"urls": ["stun:stun1.l.google.com:19302"]},
+                    {"urls": ["stun:stun2.l.google.com:19302"]},
+                    {
+                        "urls": ["turn:relay.metered.ca:80"],
+                        "username": "user",
+                        "credential": "password"
+                    }
+                ],
+                "iceTransportPolicy": "all",
+            })
 
-        webrtc_streamer(
-            key="exercise",
-            mode=WebRtcMode.SENDRECV,
-            rtc_configuration=rtc_configuration,
-            video_processor_factory=lambda: VideoProcessor(exercise_id=exercise_id,
-                                                           draw_predicted_lm=draw_predicted_lm,
-                                                           error_threshold=error_threshold,
-                                                           visibility_threshold=visibility_threshold,
-                                                           api_endpoint=api_endpoint,
-                                                           sequence_length=sequence_length
-                                                           ),
-            media_stream_constraints={
-                "video": {
-                    "width": {"ideal": 1280},
-                    "height": {"ideal": 720},
-                    "frameRate": {"ideal": 30},
+            webrtc_streamer(
+                key="exercise",
+                mode=WebRtcMode.SENDRECV,
+                rtc_configuration=rtc_configuration,
+                video_processor_factory=lambda: VideoProcessor(exercise_id=exercise_id,
+                                                            draw_predicted_lm=draw_predicted_lm,
+                                                            error_threshold=error_threshold,
+                                                            visibility_threshold=visibility_threshold,
+                                                            api_endpoint=api_endpoint,
+                                                            sequence_length=sequence_length
+                                                            ),
+                media_stream_constraints={
+                    "video": {
+                        "width": {"ideal": 1280},
+                        "height": {"ideal": 720},
+                        "frameRate": {"ideal": 30},
+                    },
+                    "audio": False,
                 },
-                "audio": False,
-            },
-        )
+            )
 
-    if input_selection == "Video Upload":
-        uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
-        if uploaded_file:
-            if st.button("Process Video"):
-                exercise = ExerciseAnalyzer(exercise_id=exercise_id,
-                                            draw_predicted_lm=draw_predicted_lm,
-                                            error_threshold=error_threshold,
-                                            visibility_threshold=visibility_threshold,
-                                            api_endpoint=api_endpoint,
-                                            sequence_length=sequence_length
-                                            )
+        if input_selection == "Video Upload":
+            uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
+            if uploaded_file:
+                if st.button("Process Video"):
+                    exercise = ExerciseAnalyzer(exercise_id=exercise_id,
+                                                draw_predicted_lm=draw_predicted_lm,
+                                                error_threshold=error_threshold,
+                                                visibility_threshold=visibility_threshold,
+                                                api_endpoint=api_endpoint,
+                                                sequence_length=sequence_length
+                                                )
 
-                input_video_bytes = BytesIO(uploaded_file.read())
-                input_video_bytes.seek(0)
+                    input_video_bytes = BytesIO(uploaded_file.read())
+                    input_video_bytes.seek(0)
 
-                with st.spinner("Processing video..."):
-                    result = process_uploaded_video(input_video_bytes, exercise)
+                    with st.spinner("Processing video..."):
+                        result = process_uploaded_video(input_video_bytes, exercise)
 
-                if result["success"]:
-                    st.success("Processing complete!")
-                    st.download_button(
-                        label="Download Processed Video",
-                        data=result["processed_video_bytes"],
-                        file_name="processed_video.mp4",
-                        mime="video/mp4",
-                    )
-                else:
-                    st.error("Processing failed.")
+                    if result["success"]:
+                        st.success("Processing complete!")
+                        st.download_button(
+                            label="Download Processed Video",
+                            data=result["processed_video_bytes"],
+                            file_name="processed_video.mp4",
+                            mime="video/mp4",
+                        )
+                    else:
+                        st.error("Processing failed.")
 
 
 # Render the appropriate page
