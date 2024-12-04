@@ -41,12 +41,12 @@ def render_main_page():
     with col2:
         st.image("images/image1_logo.png", width=300)
 
-    st.markdown("<h1 style='font-size: 70px;text-align: center'>Tr_AI_Ner</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='color: #ff4b4b;font-size: 50px;text-align: center;'>Fitness AI coach</h2>", unsafe_allow_html=True)
+    #st.markdown("<h1 style='font-size: 70px;text-align: center'>Tr_AI_Ner</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ff4b4b;font-size: 50px;text-align: center;'>AI Fitness Coach</h2>", unsafe_allow_html=True)
 
     st.markdown("""
         <p style="font-size: 24px;">
-            Transform your workouts with Tr_AI_ner Fitness AI Coach, the ultimate web application for personalized fitness guidance.
+            Transform your workouts with Tr-AI-ner AI Fitness Coach, the ultimate web application for personalized fitness guidance.
         </p>
         <ul style="font-size: 24px;">
             <li>Recognizes Exercises</li>
